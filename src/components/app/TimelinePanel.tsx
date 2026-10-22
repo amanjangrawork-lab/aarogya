@@ -167,14 +167,14 @@ export function TimelinePanel({
 
       {shownMeds.length > 0 && (
         <>
-          <h4 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+          <h4 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-slate-300">
             💊 Currently active medicines ({shownMeds.length}) — latest per name
           </h4>
           <ul className="list-disc space-y-1 pl-5 text-[14px]">
             {shownMeds.map((m, i) => (
               <li key={i}>
                 <b className="translate-none">{m.name}</b> {m.dosage} · {m.frequency}{" "}
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-slate-400">
                   since {m.date} · {m.from}
                 </span>
               </li>
@@ -188,14 +188,14 @@ export function TimelinePanel({
 
       {shownTrends.length > 0 && (
         <>
-          <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+          <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
             📈 Lab trends (across records)
           </h4>
           <div className="grid gap-3 sm:grid-cols-2">
             {shownTrends.slice(0, 6).map((g, i) => (
               <div key={i} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                 <b className="text-[13px]">{g.test}</b>{" "}
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-slate-400">
                   usual {String(g.low)}–{String(g.high)} {g.unit}
                 </span>
                 <div className="mt-1">{sparkline(g.points)}</div>
@@ -206,7 +206,7 @@ export function TimelinePanel({
       )}
 
       <div className="mt-6 mb-2 flex items-center gap-3">
-        <h4 className="text-[11px] uppercase tracking-[0.18em] text-slate-400">🕒 Events</h4>
+        <h4 className="text-[11px] uppercase tracking-[0.18em] text-slate-300">🕒 Events</h4>
         <button
           onClick={() => setShowForm((v) => !v)}
           className="rounded-lg border border-white/20 px-3 py-1.5 text-[12px] font-bold text-slate-200 transition hover:border-cyan-300/60"
@@ -288,7 +288,7 @@ export function TimelinePanel({
               <span className="text-lg leading-tight">{e.icon}</span>
               <div>
                 <b className="text-[13px]">{e.title}</b>
-                <div className="text-[11px] text-slate-500">
+                <div className="text-[11px] text-slate-400">
                   {e.date} · {e.sub}
                 </div>
               </div>

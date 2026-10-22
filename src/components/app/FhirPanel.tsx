@@ -167,7 +167,7 @@ export function FhirPanel({
             <p className="mb-2 text-[12px] text-slate-300">
               🔗 Share active — expires {share.expiry.slice(0, 10)} · scope: {share.scope}
             </p>
-            <p className="mb-3 break-all text-[11px] text-slate-500">{share.link}</p>
+            <p className="mb-3 break-all text-[11px] text-slate-400">{share.link}</p>
             <div className="flex gap-2">
               <button
                 onClick={async () => {
@@ -244,13 +244,13 @@ export function FhirPanel({
         {JSON.stringify(bundle, null, 2)}
       </pre>
 
-      <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+      <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
         Mock ABHA only — no real ABDM call. The bundle uses Patient + Observation (LOINC) +
         MedicationRequest + Condition (ICD-10/SNOMED CT) + DocumentReference. In production the two
         mock handlers are replaced by ABDM gateway calls; the bundle shape already conforms.
       </p>
       {pending && (
-        <p className="mt-2 text-[11px] text-slate-500">
+        <p className="mt-2 text-[11px] text-slate-400">
           {pending.record.fileName} is awaiting review and is not in this bundle yet.
         </p>
       )}

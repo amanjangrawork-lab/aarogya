@@ -46,7 +46,7 @@ export function DataPanel({
             <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-300">
               {rec.docType.replace(/_/g, " ")}
             </span>
-            <span className="text-[11px] text-slate-500">{rec.createdAt.slice(0, 10)}</span>
+            <span className="text-[11px] text-slate-400">{rec.createdAt.slice(0, 10)}</span>
             <button
               onClick={() => onDelete(rec.id)}
               className="ml-auto rounded-lg border border-red-400/30 px-3 py-1.5 text-[12px] font-bold text-red-300 transition hover:bg-red-500/15"
@@ -126,7 +126,7 @@ export function DataPanel({
                       <td className="py-2 pr-4 text-slate-400">
                         {String(l.low)}–{String(l.high)}
                       </td>
-                      <td className="py-2 pr-4 text-slate-500">{l.loinc}</td>
+                      <td className="py-2 pr-4 text-slate-400">{l.loinc}</td>
                       <td className="py-2">
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -183,7 +183,7 @@ export function DataPanel({
                 <tr key={i} className="border-b border-white/5 align-top">
                   <td className="py-2 pr-4 translate-none">{r.value}</td>
                   <td className="py-2 pr-4 text-slate-400">{r.doc}</td>
-                  <td className="py-2 pr-4 text-slate-500">“{r.span.slice(0, 60)}”</td>
+                  <td className="py-2 pr-4 text-slate-400">“{r.span.slice(0, 60)}”</td>
                   <td className="py-2 pr-4">{r.conf}</td>
                   <td className="py-2">{r.status}</td>
                 </tr>

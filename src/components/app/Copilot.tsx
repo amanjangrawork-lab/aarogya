@@ -266,14 +266,14 @@ export function Copilot() {
           >
             🗑️ Erase my data
           </button>
-          <p className="mt-3 text-[11px] leading-relaxed text-slate-500">
+          <p className="mt-3 text-[11px] leading-relaxed text-slate-400">
             Educational only — not medical advice. Always consult a doctor.
           </p>
         </div>
 
         {engine && (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-[11px] text-slate-400">
-            <div className="mb-1 font-bold uppercase tracking-[0.18em] text-slate-500">Engine</div>
+            <div className="mb-1 font-bold uppercase tracking-[0.18em] text-slate-400">Engine</div>
             <div>
               {engine.engine === "llm" ? (
                 <>

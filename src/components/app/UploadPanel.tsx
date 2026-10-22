@@ -76,7 +76,7 @@ export function UploadPanel({
         <div className="mt-2 text-sm text-slate-300">
           Drag &amp; drop a PDF, JPG or PNG — or click to browse
         </div>
-        <div className="mt-1 text-[11px] text-slate-500">
+        <div className="mt-1 text-[11px] text-slate-400">
           Up to 10 MB · digital PDFs read instantly · photos and scans use OCR
         </div>
         <input
@@ -100,7 +100,7 @@ export function UploadPanel({
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <label className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
+        <label className="text-[11px] uppercase tracking-[0.18em] text-slate-300">
           New here? Try an example:
         </label>
         <select
@@ -135,7 +135,7 @@ export function UploadPanel({
         </select>
       </div>
 
-      <label className="mt-4 block text-[11px] uppercase tracking-[0.18em] text-slate-500">
+      <label className="mt-4 block text-[11px] uppercase tracking-[0.18em] text-slate-300">
         Or paste report text
       </label>
       <textarea

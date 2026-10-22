@@ -62,11 +62,11 @@ export function SummaryPanel({
         {summary.headline}
       </p>
 
-      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
         {SECTION_TITLE.abnormal[lang]} ({outside.length} outside range · {borderline.length} borderline ·{" "}
         {record.labs.length} measured)
       </h4>
-      {record.labs.length === 0 && <p className="text-sm text-slate-500">No numeric lab values found.</p>}
+      {record.labs.length === 0 && <p className="text-sm text-slate-400">No numeric lab values found.</p>}
       <ul className="space-y-2">
         {record.labs.map((l, i) => (
           <li
@@ -86,20 +86,20 @@ export function SummaryPanel({
                 {l.flag === "normal" ? "Normal" : l.flag === "borderline" ? "Borderline" : l.flag === "high" ? "▲ High" : "▼ Low"}
               </span>
               <b>{l.test}</b> — {String(l.value)} {l.unit}
-              <span className="text-slate-500">(usual {String(l.low)}–{String(l.high)})</span>
+              <span className="text-slate-400">(usual {String(l.low)}–{String(l.high)})</span>
             </div>
             <div className="mt-1 text-slate-300">
               {l.meaning?.[lang] || l.meaning?.en}
             </div>
-            {l.span && <div className="mt-1 text-[11px] text-slate-500">Source: “{l.span.slice(0, 80)}”</div>}
+            {l.span && <div className="mt-1 text-[11px] text-slate-400">Source: “{l.span.slice(0, 80)}”</div>}
           </li>
         ))}
       </ul>
 
-      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
         {SECTION_TITLE.meds[lang]}
       </h4>
-      {record.medicines.length === 0 && <p className="text-sm text-slate-500">No medicines detected.</p>}
+      {record.medicines.length === 0 && <p className="text-sm text-slate-400">No medicines detected.</p>}
       <ul className="list-disc space-y-1 pl-5 text-[14px]">
         {record.medicines.map((m, i) => (
           <li key={i}>
@@ -116,7 +116,7 @@ export function SummaryPanel({
         </p>
       )}
 
-      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
         {SECTION_TITLE.ask[lang]}
       </h4>
       <ol className="list-decimal space-y-1 pl-5 text-[14px] text-slate-200">
@@ -125,7 +125,7 @@ export function SummaryPanel({
         ))}
       </ol>
 
-      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+      <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
         {SECTION_TITLE.next[lang]}
       </h4>
       <ul className="list-disc space-y-1 pl-5 text-[14px] text-slate-200">
@@ -137,7 +137,7 @@ export function SummaryPanel({
       <p className="mt-5 rounded-xl border border-amber-400/25 bg-amber-400/[0.07] p-3 text-[12px] text-amber-100/90">
         ⚠️ {summary.disclaimer}
       </p>
-      <p className="mt-2 text-[11px] text-slate-500">
+      <p className="mt-2 text-[11px] text-slate-400">
         Reference ranges shown are adult-general; your lab&apos;s printed range prevails — confirm with
         your doctor.
       </p>

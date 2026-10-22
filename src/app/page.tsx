@@ -124,7 +124,7 @@ export default function Home() {
             How it works
           </a>
         </div>
-        <div data-reveal className="mt-20 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-slate-500">
+        <div data-reveal className="mt-20 flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-slate-400">
           <span className="h-8 w-px bg-gradient-to-b from-white/40 to-transparent" />
           scroll
         </div>
@@ -177,7 +177,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/10 px-6 py-12 text-center text-xs text-slate-500">
+      <footer className="relative z-10 border-t border-white/10 px-6 py-12 text-center text-xs text-slate-400">
         <p className="mx-auto max-w-2xl">
           Aarogya Copilot organises and explains health records. It is not a diagnostic device and never
           replaces a registered medical practitioner. In an emergency, call 108 or 112.

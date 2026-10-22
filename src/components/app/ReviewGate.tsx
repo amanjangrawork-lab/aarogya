@@ -20,7 +20,7 @@ export function ReviewGate({
     return (
       <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-8 text-center text-sm text-slate-400">
         ✅ No pending reviews.
-        <div className="mt-1 text-[12px] text-slate-500">
+        <div className="mt-1 text-[12px] text-slate-400">
           Uncertain medicines and doses never auto-save — you confirm them first.
         </div>
       </div>
@@ -67,10 +67,10 @@ export function ReviewGate({
         </div>
       )}
 
-      <h4 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+      <h4 className="mb-2 text-[11px] uppercase tracking-[0.18em] text-slate-300">
         Medicines ({meds.length})
       </h4>
-      {meds.length === 0 && <p className="text-sm text-slate-500">No medicines detected.</p>}
+      {meds.length === 0 && <p className="text-sm text-slate-400">No medicines detected.</p>}
       <div className="space-y-2">
         {meds.map((m, i) => (
           <div
@@ -114,7 +114,7 @@ export function ReviewGate({
               </label>
             </div>
             {m.span && (
-              <div className="mt-2 text-[11px] text-slate-500">
+              <div className="mt-2 text-[11px] text-slate-400">
                 Source: “{m.span.slice(0, 90)}”
                 {m.null_reason ? ` · ${m.null_reason}` : ""}
               </div>
@@ -125,7 +125,7 @@ export function ReviewGate({
 
       {labs.length > 0 && (
         <>
-          <h4 className="mb-2 mt-5 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+          <h4 className="mb-2 mt-5 text-[11px] uppercase tracking-[0.18em] text-slate-300">
             Lab values ({labs.length})
           </h4>
           <ul className="space-y-1.5">
@@ -147,7 +147,7 @@ export function ReviewGate({
                     {l.flag}
                   </span>
                 )}
-                {l.span && <div className="mt-1 text-[11px] text-slate-500">“{l.span.slice(0, 80)}”</div>}
+                {l.span && <div className="mt-1 text-[11px] text-slate-400">“{l.span.slice(0, 80)}”</div>}
               </li>
             ))}
           </ul>
