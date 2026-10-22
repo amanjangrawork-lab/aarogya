@@ -5,6 +5,7 @@ import { Fragment, Suspense, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import { Copilot } from "@/components/app/Copilot";
 
 // The WebGL scene is heavy: load it only in the browser, never on the server.
 const Stage = dynamic(() => import("@/components/three/Stage").then((m) => m.Stage), { ssr: false });
@@ -261,14 +262,5 @@ function Act({
 }
 
 function AppPreview() {
-  return (
-    <div
-      data-reveal
-      className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 backdrop-blur-sm"
-    >
-      <p className="text-sm text-slate-400">
-        The full copilot — upload, review gate, timeline, FHIR export — loads here in the next phase.
-      </p>
-    </div>
-  );
+  return <Copilot />;
 }
