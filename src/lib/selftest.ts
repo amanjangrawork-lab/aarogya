@@ -1,0 +1,88 @@
+import { extractRecord } from "./extractor";
+import { buildFhirBundle, validateFhirBundle } from "./fhir";
+import { SAMPLES } from "./samples";
+import type { SelfCheckResult } from "./types";
+
+/** Offline diagnostics: 6 samples + FHIR bundle + 4 edge cases.
+ *  Proves the extraction engine and FHIR layer without any network call. */
+export function runSelfCheck(): SelfCheckResult[] {
+  const results: SelfCheckResult[] = [];
+  const expect: Record<string, { meds?: number; medsMin?: number; labs?: number; labsMin?: number; dxMin?: number }> = {
+    rx: { meds: 4, labs: 0, dxMin: 2 },
+    lab: { meds: 0, labsMin: 8, dxMin: 1 },
+    discharge: { medsMin: 2, dxMin: 1 },
+    diagnostic: { labsMin: 0 },
+    rx2: { medsMin: 3, dxMin: 1 },
+    lab2: { labsMin: 2, dxMin: 1 },
+  };
+
+  for (const s of SAMPLES) {
+    try {
+      const rec = extractRecord(s.text, s.label);
+      const e = expect[s.id] || {};
+      const medOk =
+        e.meds === undefined ? rec.medicines.length >= (e.medsMin || 0) : rec.medicines.length === e.meds;
+      const labOk = e.labs !== undefined ? rec.labs.length === e.labs : rec.labs.length >= (e.labsMin || 0);
+      const trustOk = [...rec.medicines, ...rec.labs].every((x) => !!x.confidence && x.span !== undefined);
+      results.push({
+        id: s.id,
+        pass: !!(medOk && labOk && trustOk && rec.docType),
+        meds: rec.medicines.length,
+        labs: rec.labs.length,
+        dx: rec.diagnoses.length,
+        type: rec.docType,
+        trust: trustOk,
+      });
+    } catch (err) {
+      results.push({ id: s.id, pass: false, error: String((err as Error)?.message || err) });
+    }
+  }
+
+  try {
+    const bundle = buildFhirBundle(
+      { name: "Test", age: "", gender: "unknown", phone: "", dob: "", abha: "91-0000-0000-0000" },
+      SAMPLES.slice(0, 2).map((s) => extractRecord(s.text, s.label)),
+    );
+    const v = validateFhirBundle(bundle);
+    const hasPatient = bundle.entry.some((e) => e.resource.resourceType === "Patient");
+    const hasObs = bundle.entry.some((e) => e.resource.resourceType === "Observation");
+    results.push({ id: "fhir-bundle", pass: hasPatient && hasObs && v.valid, entry: bundle.entry.length });
+  } catch (err) {
+    results.push({ id: "fhir-bundle", pass: false, error: String((err as Error)?.message || err) });
+  }
+
+  try {
+    const neg = extractRecord("Patient has fever. Dengue NS1 negative. No diabetes.", "edge-negation.txt");
+    results.push({ id: "edge-negation", pass: !neg.diagnoses.some((d) => /dengue/i.test(d.display)) });
+  } catch {
+    results.push({ id: "edge-negation", pass: false });
+  }
+
+  try {
+    const fr = extractRecord("Tab. Metformin 500mg — 0-0-1 HS x 5 days. Tab. Amlodipine 5mg SOS.", "edge-freq.txt");
+    const f = fr.medicines.map((m) => m.frequency).join("|");
+    results.push({
+      id: "edge-freq",
+      pass: /0-0-1/.test(f) && /SOS/i.test(f) && fr.medicines.every((m) => m.confidence === "high"),
+    });
+  } catch {
+    results.push({ id: "edge-freq", pass: false });
+  }
+
+  try {
+    const dt = extractRecord("Visit 15-Mar-2026, review 12/04/2026.", "edge-dates.txt");
+    results.push({ id: "edge-dates", pass: dt.dates.length >= 2 });
+  } catch {
+    results.push({ id: "edge-dates", pass: false });
+  }
+
+  try {
+    const um = extractRecord("Hemoglobin 11.2, WBC normal.", "edge-unit.txt");
+    const hb = um.labs.find((l) => l.key === "hemoglobin");
+    results.push({ id: "edge-unit-conf", pass: !!hb && hb.confidence !== "high" && hb.needsReview === true });
+  } catch {
+    results.push({ id: "edge-unit-conf", pass: false });
+  }
+
+  return results;
+}
