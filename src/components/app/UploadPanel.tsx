@@ -50,6 +50,7 @@ export function UploadPanel({
       <div
         role="button"
         tabIndex={0}
+        aria-busy={busy}
         onClick={() => fileRef.current?.click()}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {

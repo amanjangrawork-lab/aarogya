@@ -52,6 +52,12 @@ export function SummaryPanel({
           {record.fileName}
         </span>
         <button
+          onClick={() => window.print()}
+          className="rounded-lg border border-white/20 px-3 py-1.5 text-[12px] font-bold text-slate-200 transition hover:border-cyan-300/60 hover:text-cyan-200"
+        >
+          🖨️ Print visit sheet
+        </button>
+        <button
           onClick={speak}
           className="ml-auto rounded-lg border border-white/20 px-3 py-1.5 text-[12px] font-bold text-slate-200 transition hover:border-cyan-300/60 hover:text-cyan-200"
         >

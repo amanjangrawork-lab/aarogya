@@ -215,6 +215,54 @@ export function TimelinePanel({
         </>
       )}
 
+      {wellness.length > 1 && (
+        <>
+          <h4 className="mb-2 mt-6 text-[11px] uppercase tracking-[0.18em] text-slate-300">
+            ❤️ Wellness trends (BP / sugar / weight)
+          </h4>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                label: "BP (systolic)",
+                unit: "mmHg",
+                pts: [...wellness].sort((a, b) => parseRecordDate(a.date).getTime() - parseRecordDate(b.date).getTime())
+                  .map((w) => {
+                    const m = (w.bp || "").match(/(\d{2,3})/);
+                    return m ? { d: w.date, v: parseInt(m[1], 10), flag: "normal" } : null;
+                  })
+                  .filter(Boolean) as { d: string; v: number; flag: string }[],
+              },
+              {
+                label: "Sugar",
+                unit: "mg/dL",
+                pts: [...wellness].sort((a, b) => parseRecordDate(a.date).getTime() - parseRecordDate(b.date).getTime())
+                  .map((w) => {
+                    const m = (w.sugar || "").match(/(\d{2,3})/);
+                    return m ? { d: w.date, v: parseInt(m[1], 10), flag: "normal" } : null;
+                  })
+                  .filter(Boolean) as { d: string; v: number; flag: string }[],
+              },
+              {
+                label: "Weight",
+                unit: "kg",
+                pts: [...wellness].sort((a, b) => parseRecordDate(a.date).getTime() - parseRecordDate(b.date).getTime())
+                  .map((w) => {
+                    const m = (w.wt || "").match(/(\d{2,3}(?:\.\d)?)/);
+                    return m ? { d: w.date, v: parseFloat(m[1]), flag: "normal" } : null;
+                  })
+                  .filter(Boolean) as { d: string; v: number; flag: string }[],
+              },
+            ].map((g, i) => (
+              <div key={i} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                <b className="text-[13px]">{g.label}</b>{" "}
+                <span className="text-[11px] text-slate-400">{g.unit}</span>
+                <div className="mt-1">{sparkline(g.pts)}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <div className="mt-6 mb-2 flex items-center gap-3">
         <h4 className="text-[11px] uppercase tracking-[0.18em] text-slate-300">🕒 Events</h4>
         <button
@@ -309,3 +357,4 @@ export function TimelinePanel({
     </section>
   );
 }
+

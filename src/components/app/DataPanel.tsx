@@ -6,19 +6,36 @@ import type { HealthRecord } from "@/lib/types";
 export function DataPanel({
   records,
   onDelete,
+  onUpdate,
   highlightId,
 }: {
   records: HealthRecord[];
   onDelete: (id: string) => void;
+  onUpdate?: (record: HealthRecord) => void;
   highlightId?: string | null;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<HealthRecord | null>(null);
 
   useEffect(() => {
     if (!highlightId) return;
     const el = document.getElementById("rec-" + highlightId);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [highlightId]);
+
+  function startEdit(rec: HealthRecord) {
+    setEditingId(rec.id);
+    setDraft(JSON.parse(JSON.stringify(rec)));
+  }
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+  }
+  function saveEdit() {
+    if (draft && onUpdate) onUpdate(draft);
+    cancelEdit();
+  }
 
   if (!records.length) {
     return (
@@ -59,6 +76,14 @@ export function DataPanel({
               {rec.docType.replace(/_/g, " ")}
             </span>
             <span className="text-[11px] text-slate-400">{rec.createdAt.slice(0, 10)}</span>
+            {onUpdate && (
+              <button
+                onClick={() => (editingId === rec.id ? cancelEdit() : startEdit(rec))}
+                className="rounded-lg border border-cyan-400/30 px-3 py-1.5 text-[12px] font-bold text-cyan-300 transition hover:bg-cyan-500/15"
+              >
+                {editingId === rec.id ? "Cancel" : "Edit"}
+              </button>
+            )}
             <button
               onClick={() => onDelete(rec.id)}
               className="ml-auto rounded-lg border border-red-400/30 px-3 py-1.5 text-[12px] font-bold text-red-300 transition hover:bg-red-500/15"
@@ -156,6 +181,62 @@ export function DataPanel({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {editingId === rec.id && draft && (
+            <div className="mb-4 space-y-2 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.04] p-3">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-cyan-200">
+                Edit medicines
+              </div>
+              {draft.medicines.map((m, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-3">
+                  <input
+                    value={m.name}
+                    onChange={(e) => {
+                      const meds = [...draft.medicines];
+                      meds[i] = { ...meds[i], name: e.target.value };
+                      setDraft({ ...draft, medicines: meds });
+                    }}
+                    className="rounded-lg border border-white/15 bg-[#0b1120] px-3 py-2 text-sm"
+                    aria-label="Medicine name"
+                  />
+                  <input
+                    value={m.dosage}
+                    onChange={(e) => {
+                      const meds = [...draft.medicines];
+                      meds[i] = { ...meds[i], dosage: e.target.value };
+                      setDraft({ ...draft, medicines: meds });
+                    }}
+                    className="rounded-lg border border-white/15 bg-[#0b1120] px-3 py-2 text-sm"
+                    aria-label="Dose"
+                  />
+                  <input
+                    value={m.frequency}
+                    onChange={(e) => {
+                      const meds = [...draft.medicines];
+                      meds[i] = { ...meds[i], frequency: e.target.value };
+                      setDraft({ ...draft, medicines: meds });
+                    }}
+                    className="rounded-lg border border-white/15 bg-[#0b1120] px-3 py-2 text-sm"
+                    aria-label="Schedule"
+                  />
+                </div>
+              ))}
+              <div className="flex gap-2">
+                <button
+                  onClick={saveEdit}
+                  className="rounded-lg bg-cyan-300 px-4 py-2 text-[12px] font-bold text-[#06202a]"
+                >
+                  Save changes
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  className="rounded-lg border border-white/20 px-4 py-2 text-[12px] font-bold text-slate-200"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 

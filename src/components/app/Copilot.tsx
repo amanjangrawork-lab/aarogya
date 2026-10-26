@@ -10,6 +10,7 @@ import { SummaryPanel } from "./SummaryPanel";
 import { DataPanel } from "./DataPanel";
 import { TimelinePanel } from "./TimelinePanel";
 import { FhirPanel } from "./FhirPanel";
+import { PrintSheet } from "./PrintSheet";
 
 export type Tab = "summary" | "review" | "data" | "timeline" | "fhir";
 
@@ -58,7 +59,22 @@ export function Copilot() {
     } catch {
       /* corrupted storage is not worth crashing over */
     }
+    // Best-effort profile sync with the server (durable when Supabase is configured).
+    fetch("/api/profile?patientId=patient-1")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.profile && Object.keys(d.profile).length) setProfile((p) => ({ ...p, ...d.profile }));
+      })
+      .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ patientId: "patient-1", profile }),
+    }).catch(() => {});
+  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem(LS_RECORDS, JSON.stringify(records));
@@ -168,6 +184,11 @@ export function Copilot() {
     fetch(`/api/records?id=${encodeURIComponent(id)}&patientId=patient-1`, {
       method: "DELETE",
     }).catch(() => {});
+  }, []);
+
+  const updateRecord = useCallback((updated: HealthRecord) => {
+    setRecords((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    setStatus("Record updated.");
   }, []);
 
   const addWellness = useCallback((log: WellnessLog) => {
@@ -332,7 +353,12 @@ export function Copilot() {
           <ReviewGate pending={pending} onConfirm={confirmPending} onDiscard={discardPending} />
         )}
         {tab === "data" && (
-          <DataPanel records={records} onDelete={deleteRecord} highlightId={highlightId} />
+          <DataPanel
+            records={records}
+            onDelete={deleteRecord}
+            onUpdate={updateRecord}
+            highlightId={highlightId}
+          />
         )}
         {tab === "timeline" && (
           <TimelinePanel
@@ -355,6 +381,7 @@ export function Copilot() {
           />
         )}
       </div>
+      <PrintSheet record={latest} />
     </div>
   );
 }
