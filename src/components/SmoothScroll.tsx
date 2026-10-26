@@ -21,6 +21,7 @@ export function SmoothScroll() {
       duration: reduced ? 0 : 1.1,
       smoothWheel: !reduced,
       touchMultiplier: 1.4,
+      prevent: () => false,
     });
     lenis.on("scroll", ScrollTrigger.update);
 
