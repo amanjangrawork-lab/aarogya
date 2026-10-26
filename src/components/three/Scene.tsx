@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { Environment, Lightformer } from "@react-three/drei";
 import { HealthOrb } from "./HealthOrb";
 import { CameraRig } from "./CameraRig";

@@ -1,4 +1,5 @@
 import type { HealthRecord, Lang } from "./types";
+import { env } from "./env";
 
 export const DISCLAIMER: Record<Lang, string> = {
   en: "Educational summary only — not a diagnosis. Medicines and abnormal values must be reviewed by your doctor. In an emergency, seek care immediately.",
@@ -118,7 +119,7 @@ export async function enhanceWithGemini(
   if (!apiKey) return null;
   try {
     const prompt = `You are a careful health explainer for Indian patients. Explain this medical record in SIMPLE plain language (grade-6 reading level). Do NOT diagnose or change medicines. Include: 1) one-paragraph summary 2) each abnormal lab value and what it may mean 3) medicine adherence reminder 4) 4 questions to ask doctor. Add: "Educational only, see your doctor." Record JSON: ${JSON.stringify({ docType: rec.docType, diagnoses: rec.diagnoses.map(d => d.display), labs: rec.labs.map(l => ({ test: l.test, value: l.value, unit: l.unit, flag: l.flag })), medicines: rec.medicines.map(m => m.name + " " + m.dosage + " " + m.frequency) }).slice(0, 4000)}`;
-    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + encodeURIComponent(apiKey), {
+    const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(env.geminiModel || "gemini-2.0-flash") + ":generateContent?key=" + encodeURIComponent(apiKey), {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.4, maxOutputTokens: 900 } }),
     });

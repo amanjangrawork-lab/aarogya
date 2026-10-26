@@ -43,6 +43,7 @@ function GlassShell() {
   const wire = useRef<THREE.LineSegments>(null);
 
   useFrame((_, dt) => {
+    if (sceneState.reduced) return;
     const reveal = windowProgress(sceneState.progress, 0.12, 0.4);
     if (glass.current) {
       const m = glass.current.material as THREE.MeshPhysicalMaterial;
@@ -127,6 +128,7 @@ function Shards() {
   );
 
   useFrame((_, dt) => {
+    if (sceneState.reduced) return;
     if (!group.current) return;
     const reveal = windowProgress(sceneState.progress, 0.12, 0.4);
     const target = reveal * 2.8;
@@ -164,6 +166,7 @@ function Core() {
   const nucleus = useRef<THREE.Mesh>(null);
 
   useFrame((state, dt) => {
+    if (sceneState.reduced) return;
     if (!group.current) return;
     const swell = windowProgress(sceneState.progress, 0.28, 0.62);
     const t = state.clock.elapsedTime;
@@ -212,7 +215,8 @@ function Rings() {
   const refs = useRef<(THREE.Mesh | null)[]>([]);
 
   useFrame((_, dt) => {
-    const form = windowProgress(sceneState.progress, 0.3, 0.55);
+    if (sceneState.reduced) return;
+      const form = windowProgress(sceneState.progress, 0.3, 0.55);
     const align = windowProgress(sceneState.progress, 0.62, 0.9);
     refs.current.forEach((mesh, i) => {
       if (!mesh) return;
@@ -276,6 +280,7 @@ function Particles() {
   }, []);
 
   useFrame((state) => {
+    if (sceneState.reduced) return;
     if (!points.current) return;
     const attr = points.current.geometry.getAttribute("position") as THREE.BufferAttribute;
     const arr = attr.array as Float32Array;
@@ -311,6 +316,7 @@ export function HealthOrb() {
   const group = useRef<THREE.Group>(null);
 
   useFrame((state, dt) => {
+    if (sceneState.reduced) return;
     if (!group.current) return;
     const targetY = sceneState.pointer.x * 0.32;
     const targetX = -sceneState.pointer.y * 0.22;
@@ -330,3 +336,6 @@ export function HealthOrb() {
     </group>
   );
 }
+
+
+

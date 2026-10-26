@@ -8,11 +8,31 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { createWorker } from "tesseract.js";
 
+// Configure the pdf.js worker so text extraction works in the browser.
+try {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url,
+  ).toString();
+} catch {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+}
+
 let workerPromise: ReturnType<typeof createWorker> | null = null;
+let workerLangs = "";
 
 async function getWorker(langs: string) {
-  if (!workerPromise) {
+  if (!workerPromise || workerLangs !== langs) {
+    if (workerPromise) {
+      try {
+        await (workerPromise as unknown as { terminate?: () => Promise<void> }).terminate?.();
+      } catch {
+        /* ignore */
+      }
+    }
     workerPromise = createWorker(langs) as unknown as ReturnType<typeof createWorker>;
+    workerLangs = langs;
   }
   return workerPromise;
 }

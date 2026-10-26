@@ -60,7 +60,7 @@ export interface StoredRecord {
 
 export async function listRecords(patientId: string): Promise<HealthRecord[]> {
   const sb = getSupabase();
-  if (!sb) return memory.records.filter((r) => r.id.startsWith(patientId) || true);
+  if (!sb) return [...memory.records];
 
   const { data, error } = await sb
     .from("health_records")

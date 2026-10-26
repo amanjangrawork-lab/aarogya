@@ -36,13 +36,11 @@ export function CameraRig() {
     const heroDrop = THREE.MathUtils.lerp(-1.35, -0.15, reveal) * (aspect < 1 ? 1.25 : 1);
     const sideShift = windowProgress(p, 0.1, 0.3) * (1 - windowProgress(p, 0.82, 1)) * 2.1 * (aspect < 1 ? 0.25 : 1);
 
-    target.current.set(x + sideShift, y + heroDrop, z);
+    const px = sceneState.pointer.x * 0.18;
+    const py = sceneState.pointer.y * 0.12;
+    target.current.set(x + sideShift + px, y + heroDrop + py, z);
     const k = 1 - Math.exp(-2.6 * dt);
     camera.position.lerp(target.current, k);
-
-    // Pointer parallax on the camera itself, subtle.
-    camera.position.x += sceneState.pointer.x * 0.18;
-    camera.position.y += sceneState.pointer.y * 0.12;
     camera.lookAt(sideShift * 0.55, heroDrop * 0.4, 0);
   });
 

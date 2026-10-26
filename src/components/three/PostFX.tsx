@@ -52,7 +52,7 @@ const AtmosphereShader = {
  * the only combination that stays warning-free on three r170.
  */
 export function PostFX() {
-  const { gl, scene, camera, size } = useThree();
+  const { gl, scene, camera, size, invalidate } = useThree();
 
   const composer = useMemo(() => {
     const c = new EffectComposer(gl);
@@ -81,6 +81,7 @@ export function PostFX() {
       pass.material.uniforms.uTime.value = state.clock.elapsedTime;
     }
     composer.render();
+    invalidate();
   }, 1);
 
   return null;

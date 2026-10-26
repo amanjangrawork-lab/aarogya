@@ -24,8 +24,11 @@ export function extractDates(text: string): string[] {
   for (const re of patterns) {
     let m: RegExpExecArray | null;
     re.lastIndex = 0;
-    while ((m = re.exec(text)) !== null) out.add(m[0].trim());
-    if (out.size > 8) break;
+    while ((m = re.exec(text)) !== null) {
+      out.add(m[0].trim());
+      if (out.size >= 8) break;
+    }
+    if (out.size >= 8) break;
   }
   return [...out].slice(0, 8);
 }

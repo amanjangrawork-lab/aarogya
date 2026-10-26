@@ -32,7 +32,7 @@ export function ReviewGate({
   const uncertain = meds.filter((m) => m.needsReview).length + labs.filter((l) => l.needsReview).length;
 
   function setField(index: number, key: "dosage" | "frequency", value: string) {
-    const base = pending!.record;
+    const base = draft ?? pending!.record;
     const next: HealthRecord = {
       ...base,
       medicines: base.medicines.map((m, i) =>

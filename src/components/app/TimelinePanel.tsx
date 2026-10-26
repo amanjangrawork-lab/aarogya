@@ -72,15 +72,20 @@ export function TimelinePanel({
         parseRecordDate(a.dates[0] || a.createdAt).getTime() -
         parseRecordDate(b.dates[0] || b.createdAt).getTime(),
     );
-    const medMap = new Map<string, { name: string; dosage: string; frequency: string; date: string; from: string }>();
+    const medMap = new Map<string, { name: string; dosage: string; frequency: string; date: string; from: string; changed: boolean; prevDosage: string }>();
     for (const r of ordered) {
       for (const m of r.medicines) {
-        medMap.set(m.name.toLowerCase(), {
+        const key = m.name.toLowerCase();
+        const prev = medMap.get(key);
+        const changed = !!prev && prev.dosage !== m.dosage;
+        medMap.set(key, {
           name: m.name,
           dosage: m.dosage,
           frequency: m.frequency,
           date: r.dates[0] || r.createdAt.slice(0, 10),
           from: r.fileName,
+          changed: changed || (prev?.changed ?? false),
+          prevDosage: changed ? prev!.dosage : (prev?.prevDosage ?? ""),
         });
       }
     }
@@ -174,6 +179,11 @@ export function TimelinePanel({
             {shownMeds.map((m, i) => (
               <li key={i}>
                 <b className="translate-none">{m.name}</b> {m.dosage} · {m.frequency}{" "}
+                {m.changed && (
+                  <span className="rounded-full bg-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-200">
+                    dose changed (was {m.prevDosage})
+                  </span>
+                )}{" "}
                 <span className="text-[11px] text-slate-400">
                   since {m.date} · {m.from}
                 </span>

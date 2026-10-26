@@ -222,6 +222,15 @@ function merge(
     const ref = lookupLab(l.test);
     const numeric = typeof l.value === "number" ? l.value : parseFloat(String(l.value ?? ""));
     const confidence = normaliseConfidence(l.confidence);
+    // Recompute the flag deterministically from the value + reference range so a
+    // wrong/missing LLM flag can never mask an abnormal result.
+    let flag: LabFlag = l.flag ? normaliseFlag(l.flag) : "normal";
+    if (ref && !Number.isNaN(numeric)) {
+      if (numeric < ref.low) flag = "low";
+      else if (numeric > (ref.borderlineHigh ?? ref.high)) flag = ref.key === "hdl" ? "normal" : "high";
+      else if (numeric > ref.high) flag = ref.key === "hdl" ? "low" : "borderline";
+      if (ref.key === "hdl") flag = numeric < ref.low ? "low" : "normal";
+    }
     labs.push({
       key: ref?.key || l.test.toLowerCase().replace(/\s+/g, "_"),
       test: l.test,
@@ -229,7 +238,7 @@ function merge(
       unit: (l.unit || ref?.unit || "").trim(),
       low: l.low ? Number(l.low) : (ref?.low ?? ""),
       high: l.high ? Number(l.high) : (ref?.high ?? ""),
-      flag: l.flag ? normaliseFlag(l.flag) : "normal",
+      flag,
       loinc: l.loinc || ref?.loinc || "",
       meaning: ref?.meaning ?? {
         en: "Value extracted from the document.",
@@ -258,11 +267,14 @@ function merge(
     });
   }
 
-  // Prefer the model's values where they survived validation; fall back to the
-  // deterministic engine for anything the model missed.
-  const mergedMeds = medicines.length ? medicines : base.medicines;
-  const mergedLabs = labs.length ? labs : base.labs;
-  const mergedDx = diagnoses.length ? diagnoses : base.diagnoses;
+  // Prefer the model's values where they survived validation, but keep anything
+  // the deterministic engine found that the model missed (union, de-duplicated).
+  const medKeys = new Set(medicines.map((m) => m.name.toLowerCase()));
+  const mergedMeds = [...medicines, ...base.medicines.filter((m) => !medKeys.has(m.name.toLowerCase()))];
+  const labKeys = new Set(labs.map((l) => l.key));
+  const mergedLabs = [...labs, ...base.labs.filter((l) => !labKeys.has(l.key))];
+  const dxKeys = new Set(diagnoses.map((d) => d.display.toLowerCase()));
+  const mergedDx = [...diagnoses, ...base.diagnoses.filter((d) => !dxKeys.has(d.display.toLowerCase()))];
 
   const docType = DOC_TYPES.includes(payload.docType as DocType)
     ? (payload.docType as DocType)

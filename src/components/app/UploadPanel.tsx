@@ -21,6 +21,7 @@ export function UploadPanel({
   const [ocrLang, setOcrLang] = useState("eng");
   const [dragOver, setDragOver] = useState(false);
   const [sample, setSample] = useState("lab");
+  const [pasted, setPasted] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleFiles(files: FileList | File[]) {
@@ -140,15 +141,31 @@ export function UploadPanel({
       </label>
       <textarea
         rows={4}
+        value={pasted}
+        onChange={(e) => setPasted(e.target.value)}
         placeholder="Paste prescription / lab / discharge text here…"
         className="mt-1 w-full rounded-xl border border-white/15 bg-[#0b1120] p-3 text-sm"
         onPaste={(e) => {
           const text = e.clipboardData.getData("text");
-          if (!text.trim()) return;
+          if (text.trim().length < 20) return;
           onAnalyse(text, "pasted-text");
+          setPasted("");
         }}
         aria-label="Paste report text"
       />
+      <div className="mt-2 flex justify-end">
+        <button
+          disabled={busy || pasted.trim().length < 20}
+          onClick={() => {
+            if (pasted.trim().length < 20) return;
+            onAnalyse(pasted, "pasted-text");
+            setPasted("");
+          }}
+          className="rounded-lg border border-cyan-300/40 bg-cyan-300/10 px-4 py-2 text-[13px] font-bold text-cyan-100 transition hover:bg-cyan-300/20 disabled:opacity-50"
+        >
+          {busy ? "Reading…" : "Analyze pasted text"}
+        </button>
+      </div>
 
       <p className="mt-2 min-h-[1.2em] text-[13px] text-cyan-200/90" role="status" aria-live="polite">
         {status}

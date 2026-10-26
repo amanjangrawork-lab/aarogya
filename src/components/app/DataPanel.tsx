@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { HealthRecord } from "@/lib/types";
 
 export function DataPanel({
   records,
   onDelete,
+  highlightId,
 }: {
   records: HealthRecord[];
   onDelete: (id: string) => void;
+  highlightId?: string | null;
 }) {
   const [open, setOpen] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!highlightId) return;
+    const el = document.getElementById("rec-" + highlightId);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [highlightId]);
 
   if (!records.length) {
     return (
@@ -40,7 +48,11 @@ export function DataPanel({
   return (
     <div className="space-y-4">
       {records.map((rec) => (
-        <section key={rec.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+        <section
+          key={rec.id}
+          id={"rec-" + rec.id}
+          className={`rounded-2xl border p-5 ${highlightId === rec.id ? "border-cyan-300/60 bg-cyan-300/5" : "border-white/10 bg-white/[0.03]"}`}
+        >
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <b>{rec.fileName}</b>
             <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[11px] text-slate-300">

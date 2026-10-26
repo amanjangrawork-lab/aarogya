@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HealthRecord, Lang, PatientProfile, WellnessLog } from "@/lib/types";
 import { buildLocalSummary } from "@/lib/summarizer";
 import { SAMPLES } from "@/lib/samples";
-import { parseRecordDate } from "@/lib/fhir";
 import { UploadPanel } from "./UploadPanel";
 import { ReviewGate } from "./ReviewGate";
 import { SummaryPanel } from "./SummaryPanel";
@@ -46,6 +45,7 @@ export function Copilot() {
   const [busy, setBusy] = useState(false);
   const [engine, setEngine] = useState<{ engine: string; model: string | null } | null>(null);
   const [reviewCount, setReviewCount] = useState(0);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   /* Restore from local storage so a reload never loses the visit. */
   useEffect(() => {
@@ -73,7 +73,7 @@ export function Copilot() {
     localStorage.setItem(LS_LANG, lang);
   }, [lang]);
 
-  const latest = records.length ? records[records.length - 1] : null;
+  const latest = records.length ? records[0] : null;
 
   const summary = useMemo(
     () => (latest ? buildLocalSummary(latest, lang) : null),
@@ -143,12 +143,17 @@ export function Copilot() {
   );
 
   const confirmPending = useCallback((record: HealthRecord) => {
-    setRecords((prev) => [record, ...prev]);
+    const confirmed: HealthRecord = {
+      ...record,
+      medicines: record.medicines.map((m) => ({ ...m, needsReview: false, userConfirmed: true, confidence: m.confidence === "low" ? "medium" : m.confidence })),
+      labs: record.labs.map((l) => ({ ...l, needsReview: false, userConfirmed: true })),
+    };
+    setRecords((prev) => [confirmed, ...prev]);
     setPending(null);
     setReviewCount(0);
     setTab("summary");
     setStatus(
-      `Saved with provenance: ${record.medicines.length} medicines, ${record.labs.length} lab values.`,
+      `Saved with provenance: ${confirmed.medicines.length} medicines, ${confirmed.labs.length} lab values.`,
     );
   }, []);
 
@@ -326,21 +331,28 @@ export function Copilot() {
         {tab === "review" && (
           <ReviewGate pending={pending} onConfirm={confirmPending} onDiscard={discardPending} />
         )}
-        {tab === "data" && <DataPanel records={records} onDelete={deleteRecord} />}
+        {tab === "data" && (
+          <DataPanel records={records} onDelete={deleteRecord} highlightId={highlightId} />
+        )}
         {tab === "timeline" && (
           <TimelinePanel
             records={records}
             wellness={wellness}
             onAddWellness={addWellness}
             onOpenRecord={(id) => {
+              setHighlightId(id);
               setTab("data");
               setStatus("Opened extracted data.");
-              void id;
             }}
           />
         )}
         {tab === "fhir" && (
-          <FhirPanel records={records} profile={profile} pending={pending} />
+          <FhirPanel
+            records={records}
+            profile={profile}
+            pending={pending}
+            onProfileUpdate={(patch) => setProfile((prev) => ({ ...prev, ...patch }))}
+          />
         )}
       </div>
     </div>

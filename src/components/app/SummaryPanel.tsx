@@ -1,7 +1,8 @@
 "use client";
 
 import type { HealthRecord, Lang } from "@/lib/types";
-import { buildLocalSummary, SECTION_TITLE, type LocalSummary } from "@/lib/summarizer";
+import { SECTION_TITLE } from "@/lib/summarizer";
+import type { LocalSummary } from "@/lib/summarizer";
 
 export function SummaryPanel({
   record,

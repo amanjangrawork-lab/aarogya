@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { HealthRecord, PatientProfile } from "@/lib/types";
 import { buildFhirBundle, validateFhirBundle } from "@/lib/fhir";
 import { mockAbhaId } from "@/lib/fhir";
@@ -10,10 +10,12 @@ export function FhirPanel({
   records,
   profile,
   pending,
+  onProfileUpdate,
 }: {
   records: HealthRecord[];
   profile: Partial<PatientProfile>;
   pending: PendingReview | null;
+  onProfileUpdate?: (patch: Partial<PatientProfile>) => void;
 }) {
   const [abha, setAbha] = useState(profile.abha || "");
   const [phone, setPhone] = useState(profile.phone || "");
@@ -21,6 +23,14 @@ export function FhirPanel({
   const [otp, setOtp] = useState("");
   const [share, setShare] = useState<{ id: string; expiry: string; scope: string; link: string } | null>(null);
   const [note, setNote] = useState("");
+
+  useEffect(() => {
+    if (!share) return;
+    if (new Date(share.expiry).getTime() < Date.now()) {
+      setShare(null);
+      setNote("Share link expired and was revoked automatically.");
+    }
+  }, [share]);
 
   const bundle = useMemo(
     () =>
@@ -142,6 +152,7 @@ export function FhirPanel({
                   setAbha(id);
                   setOtpStep("linked");
                   setNote("ABHA linked (mock): " + id);
+                  onProfileUpdate?.({ abha: id, phone, phoneLast4: phone.slice(-4) });
                 }}
                 className="rounded-lg bg-cyan-300 px-4 py-2.5 text-sm font-bold text-[#06202a]"
               >

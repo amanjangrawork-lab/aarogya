@@ -10,6 +10,7 @@ import { Scene } from "./Scene";
 export function Stage() {
   return (
     <Canvas
+      frameloop="demand"
       dpr={[1, 2]}
       gl={{
         antialias: true,
