@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   robots: { index: true, follow: true },
-  manifest: "/manifest.webmanifest",
+  manifest: "/aarogya/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));}",
+              "if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/aarogya/sw.js').catch(()=>{}));}",
           }}
         />
       </body>
