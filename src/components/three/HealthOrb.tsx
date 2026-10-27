@@ -21,7 +21,7 @@ import { sceneState, windowProgress } from "@/lib/scroll-state";
 
 const SHELL_RADIUS = 1.5;
 const SHARD_COUNT = 54;
-const PARTICLE_COUNT = 1400;
+const PARTICLE_COUNT = typeof window !== "undefined" && window.innerWidth < 768 ? 600 : 1400;
 
 const CORE_LOBES: { pos: [number, number, number]; scale: number }[] = [
   { pos: [0, 0.12, 0], scale: 0.62 },
@@ -88,7 +88,7 @@ function GlassShell() {
 }
 
 function Shards() {
-  const group = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.InstancedMesh>(null);
   const geo = useMemo(() => new THREE.TetrahedronGeometry(0.075, 0), []);
   const mat = useMemo(
     () =>
@@ -127,37 +127,35 @@ function Shards() {
     [],
   );
 
+  const positions = useRef(seeds.map((s) => s.dir.clone().multiplyScalar(SHELL_RADIUS)));
+  const rotations = useRef(seeds.map(() => new THREE.Euler()));
+  const scales = useRef(seeds.map((s) => s.scale));
+
   useFrame((_, dt) => {
     if (sceneState.reduced) return;
-    if (!group.current) return;
+    const mesh = meshRef.current;
+    if (!mesh) return;
     const reveal = windowProgress(sceneState.progress, 0.12, 0.4);
     const target = reveal * 2.8;
-    group.current.children.forEach((child, i) => {
-      const s = seeds[i];
-      const mesh = child as THREE.Mesh;
+    const dummy = new THREE.Object3D();
+    seeds.forEach((s, i) => {
       const desired = s.dir.clone().multiplyScalar(SHELL_RADIUS + target * s.scale);
-      mesh.position.lerp(desired, 1 - Math.exp(-4 * dt));
-      mesh.rotation.x += s.spin.x * dt * reveal;
-      mesh.rotation.y += s.spin.y * dt * reveal;
-      mesh.rotation.z += s.spin.z * dt * reveal;
-      // Shards are invisible until the shell starts to open.
+      positions.current[i].lerp(desired, 1 - Math.exp(-4 * dt));
+      rotations.current[i].x += s.spin.x * dt * reveal;
+      rotations.current[i].y += s.spin.y * dt * reveal;
+      rotations.current[i].z += s.spin.z * dt * reveal;
       const vis = Math.max(0, reveal * 1.6 - 0.25);
-      mesh.scale.setScalar(s.scale * vis);
+      dummy.position.copy(positions.current[i]);
+      dummy.rotation.copy(rotations.current[i]);
+      dummy.scale.setScalar(s.scale * vis);
+      dummy.updateMatrix();
+      mesh.setMatrixAt(i, dummy.matrix);
     });
+    mesh.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <group ref={group}>
-      {seeds.map((s, i) => (
-        <mesh
-          key={i}
-          geometry={geo}
-          material={mat}
-          position={s.dir.clone().multiplyScalar(SHELL_RADIUS)}
-          scale={s.scale}
-        />
-      ))}
-    </group>
+    <instancedMesh ref={meshRef} args={[geo, mat, SHARD_COUNT]} />
   );
 }
 

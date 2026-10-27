@@ -128,3 +128,17 @@ describe("FHIR R4 bundle", () => {
     expect(id.some((i) => i.system === "http://abdm.gov.in/abha" && i.value === profile.abha)).toBe(true);
   });
 });
+
+describe("date extraction cap", () => {
+  it("returns at most 8 dates", () => {
+    const text = "01/01/2025 02/02/2025 03/03/2025 04/04/2025 05/05/2025 06/06/2025 07/07/2025 08/08/2025 09/09/2025 10/10/2025";
+    expect(extractDates(text).length).toBeLessThanOrEqual(8);
+  });
+});
+
+describe("parseRecordDate", () => {
+  it("handles ISO-like and textual dates", () => {
+    const d = parseRecordDate("2025-05-14");
+    expect(d.getUTCFullYear()).toBe(2025);
+  });
+});

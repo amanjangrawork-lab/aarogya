@@ -12,6 +12,7 @@ extraction → human review → longitudinal timeline → plain-language explana
 [![Next.js](https://img.shields.io/badge/Next.js-15-000?style=flat-square)](https://nextjs.org/)
 [![WCAG](https://img.shields.io/badge/WCAG%202.2%20AA-0ea5e9?style=flat-square)](https://www.w3.org/TR/WCAG22/)
 
+**Live demo:** https://amanjangrawork-lab.github.io/aarogya/ — no login, works offline.
 </div>
 
 ---
