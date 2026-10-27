@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { HealthRecord, Lang, PatientProfile, WellnessLog } from "@/lib/types";
 import { buildLocalSummary } from "@/lib/summarizer";
 import { SAMPLES } from "@/lib/samples";
+import { extractRecord } from "@/lib/extractor";
+import { buildFhirBundle } from "@/lib/fhir";
 import { UploadPanel } from "./UploadPanel";
 import { ReviewGate } from "./ReviewGate";
 import { SummaryPanel } from "./SummaryPanel";
@@ -59,22 +61,7 @@ export function Copilot() {
     } catch {
       /* corrupted storage is not worth crashing over */
     }
-    // Best-effort profile sync with the server (durable when Supabase is configured).
-    fetch("/api/profile?patientId=patient-1")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.profile && Object.keys(d.profile).length) setProfile((p) => ({ ...p, ...d.profile }));
-      })
-      .catch(() => {});
   }, []);
-
-  useEffect(() => {
-    fetch("/api/profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ patientId: "patient-1", profile }),
-    }).catch(() => {});
-  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem(LS_RECORDS, JSON.stringify(records));
@@ -101,44 +88,49 @@ export function Copilot() {
       setBusy(true);
       setStatus("Reading the document…");
       try {
-        const res = await fetch("/api/extract", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, fileName, patientId: "patient-1" }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Extraction failed.");
-        setEngine({ engine: data.engine, model: data.model });
+        const record = extractRecord(text.slice(0, 40000), fileName || "pasted-text");
+        const fhir = buildFhirBundle(
+          {
+            name: profile.name || "",
+            age: profile.age || "",
+            gender: profile.gender || "unknown",
+            phone: profile.phone || "",
+            dob: profile.dob || "",
+            abha: profile.abha,
+            phoneLast4: profile.phoneLast4,
+          },
+          [record],
+        );
+        setEngine({ engine: "deterministic", model: null });
 
         const needsReview =
-          data.record.medicines.some((m: { needsReview: boolean }) => m.needsReview) ||
-          data.record.labs.some((l: { needsReview: boolean }) => l.needsReview) ||
-          data.rejected?.length > 0;
+          record.medicines.some((m) => m.needsReview) ||
+          record.labs.some((l) => l.needsReview);
 
         setPending({
-          record: data.record,
-          fhir: data.fhir,
-          rejected: data.rejected || [],
-          engine: data.engine,
-          model: data.model,
+          record,
+          fhir,
+          rejected: [],
+          engine: "deterministic",
+          model: null,
         });
 
         if (needsReview) {
           const uncertain =
-            data.record.medicines.filter((m: { needsReview: boolean }) => m.needsReview).length +
-            data.record.labs.filter((l: { needsReview: boolean }) => l.needsReview).length;
+            record.medicines.filter((m) => m.needsReview).length +
+            record.labs.filter((l) => l.needsReview).length;
           setReviewCount(uncertain);
           setTab("review");
           setStatus(
             `${uncertain} item${uncertain === 1 ? "" : "s"} need${uncertain === 1 ? "s" : ""} your confirmation before saving.`,
           );
         } else {
-          setRecords((prev) => [data.record, ...prev]);
+          setRecords((prev) => [record, ...prev]);
           setPending(null);
           setReviewCount(0);
           setTab("summary");
           setStatus(
-            `Extracted ${data.record.medicines.length} medicines, ${data.record.labs.length} lab values, ${data.record.diagnoses.length} diagnoses.`,
+            `Extracted ${record.medicines.length} medicines, ${record.labs.length} lab values, ${record.diagnoses.length} diagnoses.`,
           );
         }
       } catch (err) {
@@ -147,7 +139,7 @@ export function Copilot() {
         setBusy(false);
       }
     },
-    [],
+    [profile],
   );
 
   const loadSample = useCallback(
@@ -181,9 +173,6 @@ export function Copilot() {
 
   const deleteRecord = useCallback((id: string) => {
     setRecords((prev) => prev.filter((r) => r.id !== id));
-    fetch(`/api/records?id=${encodeURIComponent(id)}&patientId=patient-1`, {
-      method: "DELETE",
-    }).catch(() => {});
   }, []);
 
   const updateRecord = useCallback((updated: HealthRecord) => {
@@ -193,11 +182,6 @@ export function Copilot() {
 
   const addWellness = useCallback((log: WellnessLog) => {
     setWellness((prev) => [log, ...prev]);
-    fetch("/api/records", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...log, patientId: "patient-1" }),
-    }).catch(() => {});
     setTab("timeline");
   }, []);
 
